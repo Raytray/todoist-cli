@@ -37,7 +37,7 @@ def get_projects():
     return projects
 
 
-def add_task(content, projects, project=None, due=None):
+def add_task(content, projects, project=None, due=None, url=None):
     """Adds a task. Returns resulting item json or error"""
 
     if due is not None:
@@ -49,7 +49,11 @@ def add_task(content, projects, project=None, due=None):
     else:
         project_id = projects[DEFAULT_PROJECT_NAME]
 
-    params = [('content', content), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
+    if url is not None:
+        params = [('content', "{} ({})".format(url, content)), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
+
+    else:
+        params = [('content', content), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
 
     res_url = "{}/addItem?{}".format(URL, urllib.urlencode(params))
 
@@ -69,12 +73,13 @@ def main():
     parser.add_argument('-p', '--project', help="project to add task to")
     parser.add_argument('content', help="desired task")
     parser.add_argument('-d', '--due', help="Due when?")
+    parser.add_argument('-u', '--url', help="URL?")
 
     args = parser.parse_args()
 
     projects = get_projects()
 
-    json_response = add_task(args.content, projects, project=args.project, due=args.due)
+    json_response = add_task(args.content, projects, project=args.project, due=args.due, url=args.url)
     print "{} added to project {}, due {}".format(json_response['content'], projects[json_response['project_id']], json_response['due_date'])
 
 
