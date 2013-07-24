@@ -40,9 +40,6 @@ def get_projects():
 def add_task(content, projects, project=None, due=None, url=None):
     """Adds a task. Returns resulting item json or error"""
 
-    if due is not None:
-        params.append(('date_string', due))
-
     if project in projects:
         project_id = projects[project]
 
@@ -54,6 +51,9 @@ def add_task(content, projects, project=None, due=None, url=None):
 
     else:
         params = [('content', content), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
+
+    if due is not None:
+        params.append(('date_string', due))
 
     res_url = "{}/addItem?{}".format(URL, urllib.urlencode(params))
 
