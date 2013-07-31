@@ -82,7 +82,9 @@ def main():
     projects = get_projects()
 
     json_response = add_task(args.content, projects, project=args.project, due=args.due, url=args.url)
-    print "{} added to project {}, due {}".format(json_response['content'], projects[json_response['project_id']], json_response['due_date'])
+    print "{} \n".format(json_response['content']) + \
+        "due {} \n".format(json_response['due_date']) + \
+        "added to project {}".format(projects[json_response['project_id']])
 
 
 if __name__ == "__main__":
