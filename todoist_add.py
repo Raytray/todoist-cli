@@ -47,7 +47,7 @@ def add_task(content, projects, project=None, due=None, url=None):
         project_id = projects[DEFAULT_PROJECT_NAME]
 
     if url is not None:
-        if not url.startswith("http://"):
+        if not url.startswith("http://") or not url.startswith("https://"):
             url = "http://{}".format(url)
         params = [('content', "{} ({})".format(url, content)), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
 
