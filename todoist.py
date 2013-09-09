@@ -41,7 +41,9 @@ def get_projects():
 def list_projects():
     """Prints a list of the projects"""
     projects = get_projects()
-    pprint.pprint([name for name in projects.keys() if type(name) != int])
+    project_names = [name for name in projects.keys() if type(name) != int]
+    project_names.sort()
+    pprint.pprint(project_names)
 
 
 def add_task(content, projects, project=None, due=None, url=None):
