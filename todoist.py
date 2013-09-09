@@ -4,6 +4,7 @@ import argparse
 import ConfigParser
 import json
 import os
+import pprint
 
 config = ConfigParser.ConfigParser()
 config.read([os.path.expanduser('~/.todoist.cfg')])
@@ -37,6 +38,12 @@ def get_projects():
     return projects
 
 
+def list_projects():
+    """Prints a list of the projects"""
+    projects = get_projects()
+    pprint.pprint([name for name in projects.keys() if type(name) != int])
+
+
 def add_task(content, projects, project=None, due=None, url=None):
     """Adds a task. Returns resulting item json or error"""
 
@@ -47,7 +54,7 @@ def add_task(content, projects, project=None, due=None, url=None):
         project_id = projects[DEFAULT_PROJECT_NAME]
 
     if url is not None:
-        if not url.startswith("http://") or not url.startswith("https://"):
+        if not url.startswith("http://") and not url.startswith("https://"):
             url = "http://{}".format(url)
         params = [('content', "{} ({})".format(url, content)), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
 
@@ -67,13 +74,16 @@ def add_task(content, projects, project=None, due=None, url=None):
 
     json_response = json.loads(response.text)
 
-    return json_response
+    print "{} \n".format(json_response['content']) + \
+        "due {} \n".format(json_response['due_date']) + \
+        "added to project {}".format(projects[json_response['project_id']])
 
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('function', help='Function to call: add, list_projects')
     parser.add_argument('-p', '--project', help="project to add task to")
-    parser.add_argument('content', help="desired task")
+    parser.add_argument('-c', '--content', help="desired task")
     parser.add_argument('-d', '--due', help="Due when?")
     parser.add_argument('-u', '--url', help="URL?")
 
@@ -81,10 +91,10 @@ def main():
 
     projects = get_projects()
 
-    json_response = add_task(args.content, projects, project=args.project, due=args.due, url=args.url)
-    print "{} \n".format(json_response['content']) + \
-        "due {} \n".format(json_response['due_date']) + \
-        "added to project {}".format(projects[json_response['project_id']])
+    if args.function.lower() == "add":
+        add_task(args.content, projects, project=args.project, due=args.due, url=args.url)
+    else:
+        list_projects()
 
 
 if __name__ == "__main__":
