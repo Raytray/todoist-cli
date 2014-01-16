@@ -13,6 +13,8 @@ TOKEN = config.get('DEFAULT', 'TOKEN')
 DEFAULT_PROJECT_NAME = config.get('DEFAULT', 'DEFAULT_PROJECT_NAME')
 URL = 'https://api.todoist.com/API'
 
+temp_file = '/tmp/todoist-cli'
+
 
 def get_projects():
     """Returns a dictionary of projects with key: value of
@@ -76,9 +78,32 @@ def add_task(content, projects, project=None, due=None, url=None):
 
     json_response = json.loads(response.text)
 
+    with open(temp_file, 'w') as last_item:
+        last_item.write(str(json_response['id']))
+
     print "{} \n".format(json_response['content']) + \
         "due {} \n".format(json_response['due_date']) + \
         "added to project {}".format(projects[json_response['project_id']])
+
+
+def undo():
+    """Reads in last id of item written if any. Deletes last item."""
+
+    try:
+        with open(temp_file) as last_item:
+            last_item_id = int(last_item.read())
+            params = [('ids', [last_item_id]), ('token', TOKEN)]
+            res_url = "{}/deleteItems?{}".format(URL, urllib.urlencode(params))
+            response = requests.get(res_url)
+
+            if response.status_code != 200 or response.text.startswith('"ERROR'):
+                print response.reason, response.text
+                exit()
+            else:
+                print "removed {}".format(last_item_id)
+
+    except IOError:
+        print "Nothing to undo"
 
 
 def main():
@@ -95,6 +120,8 @@ def main():
 
     if args.function.lower() == "add":
         add_task(args.content, projects, project=args.project, due=args.due, url=args.url)
+    elif args.function.lower() == "undo":
+        undo()
     else:
         list_projects()
 
