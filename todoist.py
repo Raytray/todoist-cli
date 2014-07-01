@@ -25,14 +25,10 @@ def get_projects():
 
     response = requests.get(res_url)
 
-    if response.status_code != 200:
-        print response.reason
-        exit()
-
+    error(response)
     json_response = json.loads(response.text)
 
     projects = {}
-
     for project in json_response:
         projects[project['name']] = project['id']
         projects[project['id']] = project['name']
@@ -75,10 +71,7 @@ def add_task(content, projects, project=None, due=None, url=None):
     res_url = "{}/addItem?{}".format(URL, urllib.urlencode(params))
     response = requests.get(res_url)
 
-    if response.status_code != 200 or response.text.startswith('"ERROR'):
-        print response.reason, response.text
-        exit()
-
+    error(response)
     json_response = json.loads(response.text)
 
     with open(TEMP_FILE, 'w') as last_item:
@@ -99,14 +92,17 @@ def undo():
             res_url = "{}/deleteItems?{}".format(URL, urllib.urlencode(params))
             response = requests.get(res_url)
 
-            if response.status_code != 200 or response.text.startswith('"ERR'):
-                print response.reason, response.text
-                exit()
-            else:
-                print "removed {}".format(last_item_id)
+            error(response)
+            print "removed {}".format(last_item_id)
 
     except IOError:
         print "Nothing to undo"
+
+
+def error(response):
+    if response.status_code != 200 or response.text.startswith('"ERROR'):
+        print response.reason, response.text
+        exit()
 
 
 def main():
@@ -122,11 +118,12 @@ def main():
     projects = get_projects()
 
     if args.function.lower() == "add":
-        add_task(args.content, projects, project=args.project, due=args.due, url=args.url)
+        add_task(args.content, projects, project=args.project,
+                 due=args.due, url=args.url)
+    elif args.function.lower() == "list":
+        list_projects()
     elif args.function.lower() == "undo":
         undo()
-    else:
-        list_projects()
 
 
 if __name__ == "__main__":
