@@ -1,10 +1,10 @@
-import requests
-import urllib
 import argparse
 import ConfigParser
+import requests
 import json
 import os
 import pprint
+import urllib
 
 config = ConfigParser.ConfigParser()
 config.read([os.path.expanduser('~/.todoist.cfg')])
