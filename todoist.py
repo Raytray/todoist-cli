@@ -13,7 +13,7 @@ TOKEN = config.get('DEFAULT', 'TOKEN')
 DEFAULT_PROJECT_NAME = config.get('DEFAULT', 'DEFAULT_PROJECT_NAME')
 URL = 'https://api.todoist.com/API'
 
-temp_file = '/tmp/todoist-cli'
+TEMP_FILE = '/tmp/todoist-cli'
 
 
 def get_projects():
@@ -53,23 +53,26 @@ def add_task(content, projects, project=None, due=None, url=None):
 
     if project in projects:
         project_id = projects[project]
-
     else:
         project_id = projects[DEFAULT_PROJECT_NAME]
 
     if url is not None:
         if not url.startswith("http://") and not url.startswith("https://"):
             url = "http://{}".format(url)
-        params = [('content', "{} ({})".format(url, content)), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
-
+        params = [('content', "{} ({})".format(url, content)),
+                  ('project_id', project_id),
+                  ('token', TOKEN),
+                  ('priority', 1)]
     else:
-        params = [('content', content), ('project_id', project_id), ('token', TOKEN), ('priority', 1)]
+        params = [('content', content),
+                  ('project_id', project_id),
+                  ('token', TOKEN),
+                  ('priority', 1)]
 
     if due is not None:
         params.append(('date_string', due))
 
     res_url = "{}/addItem?{}".format(URL, urllib.urlencode(params))
-
     response = requests.get(res_url)
 
     if response.status_code != 200 or response.text.startswith('"ERROR'):
@@ -78,7 +81,7 @@ def add_task(content, projects, project=None, due=None, url=None):
 
     json_response = json.loads(response.text)
 
-    with open(temp_file, 'w') as last_item:
+    with open(TEMP_FILE, 'w') as last_item:
         last_item.write(str(json_response['id']))
 
     print "{} \n".format(json_response['content']) + \
@@ -90,13 +93,13 @@ def undo():
     """Reads in last id of item written if any. Deletes last item."""
 
     try:
-        with open(temp_file) as last_item:
+        with open(TEMP_FILE) as last_item:
             last_item_id = int(last_item.read())
             params = [('ids', [last_item_id]), ('token', TOKEN)]
             res_url = "{}/deleteItems?{}".format(URL, urllib.urlencode(params))
             response = requests.get(res_url)
 
-            if response.status_code != 200 or response.text.startswith('"ERROR'):
+            if response.status_code != 200 or response.text.startswith('"ERR'):
                 print response.reason, response.text
                 exit()
             else:
@@ -108,7 +111,7 @@ def undo():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('function', help='Function to call: add, list_projects')
+    parser.add_argument('function', help='Function to call: add, list, undo')
     parser.add_argument('-p', '--project', help="project to add task to")
     parser.add_argument('-c', '--content', help="desired task")
     parser.add_argument('-d', '--due', help="Due when?")
