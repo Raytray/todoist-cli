@@ -62,6 +62,25 @@ def list_projects():
     pprint.pprint(project_names)
 
 
+def query(query="today"):
+    """Returns the query result, typically a list of todo items."""
+    query = query.split(', ')
+    params = [('token', TOKEN),
+              ('queries', json.dumps(query))]
+    res_url="{}/query?{}".format(URL, urllib.urlencode(params))
+
+    response = requests.get(res_url)
+
+    error(response)
+    json_response = json.loads(response.text)[0]
+
+    print "{} \n".format(json_response['query'])
+
+    projects = get_projects()
+    for item in json_response['data']:
+        print "{}: {}".format(projects[item['project_id']], item['content'])
+
+
 def undo():
     """Reads in last id of item written if any. Deletes last item."""
     try:
@@ -106,9 +125,10 @@ def error(response):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('function', help='Function to call: add, list, undo')
+    parser.add_argument('function', help=('Function to call: add, list,'
+                                          'query, undo'))
     parser.add_argument('-p', '--project', help="project to add task to")
-    parser.add_argument('-c', '--content', help="desired task")
+    parser.add_argument('-c', '--content', help="desired task, or query")
     parser.add_argument('-d', '--due', help="Due when?")
     parser.add_argument('-u', '--url', help="URL?")
 
@@ -121,6 +141,11 @@ def main():
                  due=args.due, url=args.url)
     elif args.function.lower() == "list":
         list_projects()
+    elif args.function.lower() == "query":
+        if args.content is not None:
+            query(args.content)
+        else:
+            query()
     elif args.function.lower() == "undo":
         undo()
 
