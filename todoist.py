@@ -74,8 +74,6 @@ def query(query="today"):
     error(response)
     json_response = json.loads(response.text)[0]
 
-    print "{} \n".format(json_response['query'])
-
     projects = get_projects()
     for item in json_response['data']:
         print "{}: {}".format(projects[item['project_id']], item['content'])
