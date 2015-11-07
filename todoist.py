@@ -67,7 +67,7 @@ def query(query="today"):
     query = query.split(', ')
     params = [('token', TOKEN),
               ('queries', json.dumps(query))]
-    res_url="{}/query?{}".format(URL, urllib.urlencode(params))
+    res_url = "{}/query?{}".format(URL, urllib.urlencode(params))
 
     response = requests.get(res_url)
 
@@ -137,7 +137,7 @@ def main():
     if args.function.lower() == "add":
         add_task(args.content, projects, project=args.project,
                  due=args.due, url=args.url)
-    elif args.function.lower() == "list":
+    elif args.function.lower() in ["list", "ls"]:
         list_projects()
     elif args.function.lower() == "query":
         if args.content is not None:
