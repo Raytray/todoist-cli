@@ -123,7 +123,7 @@ def error(response):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('function', help=('Function to call: add, list,'
+    parser.add_argument('function', help=('Function to call: add, list, '
                                           'query, undo'))
     parser.add_argument('-p', '--project', help="project to add task to")
     parser.add_argument('-c', '--content', help="desired task, or query")
